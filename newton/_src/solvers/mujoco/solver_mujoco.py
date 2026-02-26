@@ -2918,7 +2918,12 @@ class SolverMuJoCo(SolverBase):
             self._apply_mjc_control(self.model, state_in, control, self.mjw_data)
             if self.update_data_interval > 0 and self._step % self.update_data_interval == 0:
                 self._update_mjc_data(self.mjw_data, self.model, state_in)
-            self.mjw_model.opt.timestep.fill_(dt)
+            #self.mjw_model.opt.timestep.fill_(dt)
+
+            # Try with different time steps for each world.
+            # self.mjw_model.opt.timestep = wp.array([0.01, 0.001], dtype=wp.float32)
+            self.mjw_model.opt.timestep = dt
+
             with wp.ScopedDevice(self.model.device):
                 if self.mjw_model.opt.run_collision_detection:
                     self._mujoco_warp_step()

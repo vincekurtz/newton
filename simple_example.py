@@ -4,14 +4,20 @@
 #
 ##
 
+import numpy as np
 import warp as wp
 import newton
 import newton.examples
 
 
 # Simulation parameters
-dt = 0.01
-num_worlds = 100
+min_dt = 0.001
+max_dt = 0.01
+num_worlds = 4
+
+# We'll use different timesteps for each world
+dt = np.linspace(min_dt, max_dt, num_worlds).astype(np.float32)
+dt = wp.array(dt, dtype=wp.float32)
 
 # Create the model
 cartpole = newton.ModelBuilder()
@@ -55,7 +61,7 @@ while viewer.is_running():
 
         # Swap the initial and final states for the next step
         state_0, state_1 = state_1, state_0
-        t += dt
+        t += max_dt
 
     # Render at every step for now
     with wp.ScopedTimer("render", active=False):
