@@ -1,0 +1,64 @@
+##
+#
+# A simple example of cart-pole simulation.
+#
+##
+
+import warp as wp
+import newton
+import newton.examples
+
+
+# Simulation parameters
+dt = 0.01
+num_worlds = 100
+
+# Create the model
+cartpole = newton.ModelBuilder()
+newton.solvers.SolverMuJoCo.register_custom_attributes(cartpole)
+cartpole.default_shape_cfg.density = 100.0
+cartpole.default_joint_cfg.armature = 0.1
+cartpole.default_body_armature = 0.1
+
+cartpole.add_usd(
+    newton.examples.get_asset("cartpole.usda"),
+    enable_self_collisions=False,
+    collapse_fixed_joints=True,
+)
+cartpole.joint_q[-3:] = [0.0, 0.3, 0.0]  # initial joint positions
+
+builder = newton.ModelBuilder()
+builder.replicate(cartpole, num_worlds, spacing=(1.0, 2.0, 0.0))
+model = builder.finalize()
+
+# Create the solver
+solver = newton.solvers.SolverMuJoCo(model)
+state_0 = model.state()  # at the beginning of a simulation step
+state_1 = model.state()  # at the end of a simulation step
+control = model.control()
+
+# Start the visualizer
+viewer = newton.viewer.ViewerGL(headless=False)
+viewer.set_model(model)
+
+t = 0.0
+while viewer.is_running():
+    # Advance the simulation
+    # TODO: should we be using wp.ScopedCapture and capture_launch here?
+    with wp.ScopedTimer("simulate", active=False):
+        # Apply forces from the visualizer (e.g., right click and drag).
+        state_0.clear_forces()
+        viewer.apply_forces(state_0)
+
+        # Perform a simulation step (contacts = None)
+        solver.step(state_0, state_1, control, None, dt)
+
+        # Swap the initial and final states for the next step
+        state_0, state_1 = state_1, state_0
+        t += dt
+
+    # Render at every step for now
+    with wp.ScopedTimer("render", active=False):
+        viewer.begin_frame(t)
+        viewer.log_state(state_0)
+        viewer.end_frame()
