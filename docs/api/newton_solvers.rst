@@ -67,6 +67,13 @@ Supported Features
      - ❌
      - ❌
      - ❌
+   * - :class:`~newton.solvers.SolverVariableStepMuJoCo`
+     - Explicit, Semi-implicit, Implicit
+     - ✅ (uses its own collision pipeline from MuJoCo/mujoco_warp by default, unless ``use_mujoco_contacts`` is set to False)
+     - ✅ generalized coordinates
+     - ❌
+     - ❌
+     - ❌
    * - :class:`~newton.solvers.SolverSemiImplicit`
      - Semi-implicit
      - ✅
@@ -120,5 +127,6 @@ Supported Features
    SolverNotifyFlags
    SolverSemiImplicit
    SolverStyle3D
+   SolverVariableStepMuJoCo
    SolverVBD
    SolverXPBD
